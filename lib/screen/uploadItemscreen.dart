@@ -1,4 +1,6 @@
+import 'package:dawwerha/screen/NotificationScreen.dart';
 import 'package:flutter/material.dart';
+// تأكدي من اسم الملف
 
 class UploadItemScreen extends StatelessWidget {
   const UploadItemScreen({super.key});
@@ -46,6 +48,31 @@ class UploadItemScreen extends StatelessWidget {
             ),
           ],
         ),
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        backgroundColor: Colors.white,
+        selectedItemColor: Colors.black,
+        unselectedItemColor: Colors.grey,
+        items: const [
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.notifications),
+            label: 'Notifications',
+          ),
+        ],
+        currentIndex: 0,
+        onTap: (index) {
+          if (index == 0) {
+            // مثلاً ارجعي لنفس الصفحة أو صفحة الهوم
+          } else if (index == 1) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const NotificationsPage(),
+              ),
+            );
+          }
+        },
       ),
     );
   }
