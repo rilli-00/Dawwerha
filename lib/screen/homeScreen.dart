@@ -1,8 +1,26 @@
-import 'package:dawwerha/screen/uploadItemscreen.dart';
+import 'package:dawwerha/screen/itemDetailsScreen.dart';
 import 'package:flutter/material.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  int _selectedIndex = 0;
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+    if (index == 1) {
+      // Notifications page
+    } else if (index == 2) {
+      // Chat page
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -17,12 +35,27 @@ class HomeScreen extends StatelessWidget {
           fontSize: 20,
           fontWeight: FontWeight.bold,
         ),
+        actions: [
+          PopupMenuButton<String>(
+            icon: const Icon(Icons.person, color: Colors.black),
+            onSelected: (value) {
+              // Handle menu actions
+            },
+            itemBuilder: (BuildContext context) {
+              return ['حسابي', 'طلباتي', 'مساهماتي'].map((String choice) {
+                return PopupMenuItem<String>(
+                  value: choice,
+                  child: Text(choice),
+                );
+              }).toList();
+            },
+          ),
+        ],
       ),
       backgroundColor: Colors.white,
       body: Padding(
         padding: const EdgeInsets.all(12),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             TextField(
               decoration: InputDecoration(
@@ -37,20 +70,6 @@ class HomeScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 12),
-
-            Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                _buildCategoryButton("All"),
-                const SizedBox(width: 8),
-                _buildCategoryButton("Electronics"),
-                const SizedBox(width: 8),
-                _buildCategoryButton("Books"),
-              ],
-            ),
-            const SizedBox(height: 12),
-
-            // الأغراض
             Expanded(
               child: GridView.count(
                 crossAxisCount: 2,
@@ -62,19 +81,24 @@ class HomeScreen extends StatelessWidget {
                     image:
                         "https://cdn.pixabay.com/photo/2014/08/23/19/39/camera-425204_1280.jpg",
                     title: "Canon DSLR Camera",
-                    price: "\$15/day",
+                    availability: "متوفر من 1 أغسطس إلى 5 أغسطس",
+                    description:
+                        "كاميرا احترافية مناسبة لهواة التصوير، تشمل العدسات والحقيبة.",
                   ),
                   _ItemCard(
                     image:
                         "https://cdn.pixabay.com/photo/2016/05/18/23/30/books-1404387_1280.jpg",
                     title: "Stack of Novels",
-                    price: "\$5/day",
+                    availability: "متوفر من 10 أغسطس إلى 12 أغسطس",
+                    description: "مجموعة روايات مشوقة للقراءة أثناء العطلة.",
                   ),
                   _ItemCard(
                     image:
                         "https://cdn.pixabay.com/photo/2017/01/20/00/30/knife-1999654_1280.jpg",
                     title: "Kitchen Knife Set",
-                    price: "\$8/day",
+                    availability: "متوفر من 3 أغسطس إلى 6 أغسطس",
+                    description:
+                        "مجموعة سكاكين مطبخ حادة وحديثة للطهي الاحترافي.",
                   ),
                 ],
               ),
@@ -82,30 +106,21 @@ class HomeScreen extends StatelessWidget {
           ],
         ),
       ),
-
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: Colors.black,
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const UploadItemScreen()),
-          );
-        },
-        child: const Icon(Icons.add, color: Colors.white),
+      bottomNavigationBar: BottomNavigationBar(
+        backgroundColor: Colors.white,
+        selectedItemColor: Colors.black,
+        unselectedItemColor: Colors.grey,
+        currentIndex: _selectedIndex,
+        onTap: _onItemTapped,
+        items: const [
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'الرئيسية'),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.notifications),
+            label: 'الإشعارات',
+          ),
+          BottomNavigationBarItem(icon: Icon(Icons.chat), label: 'الدردشة'),
+        ],
       ),
-    );
-  }
-
-  Widget _buildCategoryButton(String title) {
-    return ElevatedButton(
-      style: ElevatedButton.styleFrom(
-        backgroundColor: Colors.black,
-        foregroundColor: Colors.white,
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-      ),
-      onPressed: () {},
-      child: Text(title),
     );
   }
 }
@@ -113,51 +128,70 @@ class HomeScreen extends StatelessWidget {
 class _ItemCard extends StatelessWidget {
   final String image;
   final String title;
-  final String price;
+  final String availability;
+  final String description;
 
   const _ItemCard({
     required this.image,
     required this.title,
-    required this.price,
+    required this.availability,
+    required this.description,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          ClipRRect(
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
-            child: Image.network(
-              image,
-              height: 100,
-              width: double.infinity,
-              fit: BoxFit.cover,
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14,
-                  ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
+    return InkWell(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder:
+                (_) => ItemDetails(
+                  image: image,
+                  title: title,
+                  availability: availability,
+                  description: description,
                 ),
-                const SizedBox(height: 4),
-                Text(price, style: const TextStyle(color: Colors.black54)),
-              ],
-            ),
           ),
-        ],
+        );
+      },
+      child: Card(
+        elevation: 2,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ClipRRect(
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(12),
+              ),
+              child: Image.network(
+                image,
+                height: 120,
+                width: double.infinity,
+                fit: BoxFit.cover,
+                errorBuilder:
+                    (context, error, stackTrace) => Container(
+                      height: 120,
+                      color: Colors.grey[300],
+                      child: const Icon(Icons.image_not_supported),
+                    ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(8),
+              child: Text(
+                title,
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
