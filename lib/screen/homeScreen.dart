@@ -1,4 +1,7 @@
 import 'package:dawwerha/screen/itemDetailsScreen.dart';
+import 'package:dawwerha/screen/NotificationScreen.dart';
+import 'package:dawwerha/screen/uploadItemScreen.dart';
+import 'package:dawwerha/screen/chatScreen.dart';
 import 'package:flutter/material.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -15,10 +18,17 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() {
       _selectedIndex = index;
     });
+
     if (index == 1) {
-      // Notifications page
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => const NotificationsPage()),
+      );
     } else if (index == 2) {
-      // Chat page
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => const ChatPage()),
+      );
     }
   }
 
@@ -106,6 +116,28 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
       ),
+
+      // زر + لإضافة منتج
+      floatingActionButton: Stack(
+        children: [
+          Positioned(
+            bottom: 70, // ارفعيه فوق البار
+            right: 16, // جهة اليمين
+            child: FloatingActionButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const UploadItemScreen()),
+                );
+              },
+              backgroundColor: Colors.black,
+              child: const Icon(Icons.add, color: Colors.white),
+            ),
+          ),
+        ],
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
+
       bottomNavigationBar: BottomNavigationBar(
         backgroundColor: Colors.white,
         selectedItemColor: Colors.black,
