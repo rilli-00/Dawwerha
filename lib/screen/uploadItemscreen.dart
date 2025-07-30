@@ -1,94 +1,129 @@
 import 'package:flutter/material.dart';
 
-class NotificationsPage extends StatelessWidget {
-  const NotificationsPage({super.key});
+class UploadItemScreen extends StatefulWidget {
+  const UploadItemScreen({super.key});
+
+  @override
+  State<UploadItemScreen> createState() => _UploadItemScreenState();
+}
+
+class _UploadItemScreenState extends State<UploadItemScreen> {
+  DateTime? availabilityDate;
+  final TextEditingController dateController = TextEditingController();
+
+  @override
+  void dispose() {
+    dateController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () {},
+          onPressed: () => Navigator.pop(context),
         ),
         title: const Text(
-          'Notifications',
+          "Add New Item",
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
         backgroundColor: Colors.white,
         elevation: 0,
       ),
+      backgroundColor: Colors.white,
       body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Container(
-          decoration: BoxDecoration(
-            color: const Color(0xFFEFEFEF),
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: ListView(
-            padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.all(20),
+        child: SingleChildScrollView(
+          child: Column(
             children: [
-              _notificationItem(
-                text: 'Alex requested to borrow the "Lawn Mower".',
-                date: 'Today',
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: TextField(
+                      decoration: InputDecoration(
+                        labelText: "Item Name",
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  IconButton(
+                    onPressed: () {
+                      // اختيار الصورة
+                    },
+                    icon: const Icon(Icons.image_outlined),
+                    iconSize: 30,
+                    color: Colors.black,
+                    tooltip: "Upload Image",
+                  ),
+                ],
               ),
-              _notificationItem(
-                text: 'You approved the "Tent" rental request.',
-                date: 'Yesterday',
+              const SizedBox(height: 15),
+
+              TextField(
+                decoration: InputDecoration(
+                  labelText: "Item Description",
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                maxLines: 3,
               ),
-              _notificationItem(
-                text: 'Jamie added "Bicycle" for rent. Price: 150﷼.',
-                date: '05/09/2023',
+              const SizedBox(height: 15),
+
+              TextField(
+                controller: dateController,
+                readOnly: true,
+                decoration: InputDecoration(
+                  labelText: "Availability Date",
+                  suffixIcon: const Icon(Icons.calendar_today),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                onTap: () async {
+                  DateTime? pickedDate = await showDatePicker(
+                    context: context,
+                    initialDate: availabilityDate ?? DateTime.now(),
+                    firstDate: DateTime.now(),
+                    lastDate: DateTime(2100),
+                  );
+                  if (pickedDate != null) {
+                    setState(() {
+                      availabilityDate = pickedDate;
+                      dateController.text =
+                          "${pickedDate.year}/${pickedDate.month}/${pickedDate.day}";
+                    });
+                  }
+                },
               ),
-              _notificationItem(
-                text: 'Chris requested to borrow "Camping Gear".',
-                date: '01/09/2023',
-              ),
-              _notificationItem(
-                text: 'Morgan added "Skis" for rent. Price: 300﷼.',
-                date: '31/08/2023',
-              ),
-              _notificationItem(
-                text: 'You added "Table" for community lending.',
-                date: '31/08/2023',
+              const SizedBox(height: 25),
+
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.black,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(30),
+                  ),
+                  minimumSize: const Size(double.infinity, 50),
+                ),
+                onPressed: () {
+                  // رفع المنتج
+                },
+                child: const Text(
+                  "Upload Item",
+                  style: TextStyle(color: Colors.white),
+                ),
               ),
             ],
           ),
         ),
-      ),
-      bottomNavigationBar: BottomAppBar(
-        shape: const CircularNotchedRectangle(),
-        notchMargin: 8.0,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            IconButton(icon: const Icon(Icons.home), onPressed: () {}),
-            IconButton(icon: const Icon(Icons.chat), onPressed: () {}),
-            IconButton(icon: const Icon(Icons.notifications), onPressed: () {}),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _notificationItem({
-    required String text,
-    required String date,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(text, style: const TextStyle(fontSize: 15)),
-          const SizedBox(height: 4),
-          Text(
-            date,
-            style: TextStyle(color: Colors.grey[600], fontSize: 13),
-          ),
-        ],
       ),
     );
   }

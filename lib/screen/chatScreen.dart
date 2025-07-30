@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:dawwerha/screen/NotificationScreen.dart';
+import 'package:dawwerha/screen/homeScreen.dart';
 
 class ChatPage extends StatelessWidget {
   const ChatPage({super.key});
@@ -27,9 +29,19 @@ class ChatPage extends StatelessWidget {
     ];
 
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text("الدردشة"),
-        backgroundColor: Colors.black,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: const Text(
+          'الدردشة',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+        centerTitle: true,
+        backgroundColor: Colors.white,
+        elevation: 0,
       ),
       body: ListView.separated(
         padding: const EdgeInsets.all(12),
@@ -52,13 +64,39 @@ class ChatPage extends StatelessWidget {
               style: const TextStyle(color: Colors.grey),
             ),
             onTap: () {
-              // هنا مستقبلاً تروح لصفحة الرسائل بين المستخدمين
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(content: Text('فتح محادثة مع ${chat['name']}')),
               );
             },
           );
         },
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        backgroundColor: Colors.white,
+        selectedItemColor: Colors.black,
+        unselectedItemColor: Colors.grey,
+        currentIndex: 2,
+        onTap: (index) {
+          if (index == 0) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (_) => const HomeScreen()),
+            );
+          } else if (index == 1) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (_) => const NotificationsPage()),
+            );
+          }
+        },
+        items: const [
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'الرئيسية'),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.notifications),
+            label: 'الإشعارات',
+          ),
+          BottomNavigationBarItem(icon: Icon(Icons.chat), label: 'الدردشة'),
+        ],
       ),
     );
   }

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:dawwerha/screen/chatScreen.dart';
+import 'package:dawwerha/screen/homeScreen.dart';
 
 class NotificationsPage extends StatelessWidget {
   const NotificationsPage({super.key});
@@ -10,19 +12,13 @@ class NotificationsPage extends StatelessWidget {
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () {},
+          onPressed: () => Navigator.pop(context),
         ),
         title: const Text(
           'Notifications',
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.search),
-            onPressed: () {},
-          ),
-        ],
         backgroundColor: Colors.white,
         elevation: 0,
       ),
@@ -35,115 +31,107 @@ class NotificationsPage extends StatelessWidget {
           ),
           child: ListView(
             padding: const EdgeInsets.all(12),
-            children: [
-              _notificationItem(
-                text: 'Alex requested to borrow the "Lawn Mower".',
+            children: const [
+              NotificationRequest(
+                name: 'Alex',
+                item: 'Lawn Mower',
                 date: 'Today',
+                duration: 'من 1 أغسطس إلى 3 أغسطس',
               ),
-              _notificationItem(
-                text: 'You approved the "Tent" rental request.',
-                date: 'Yesterday',
-              ),
-              _notificationItem(
-                text: 'Jamie added "Bicycle" for rent. Price: 150﷼.',
-                date: '05/09/2023',
-              ),
-              _notificationItem(
-                text: 'Chris requested to borrow "Camping Gear".',
+              NotificationRequest(
+                name: 'Chris',
+                item: 'Camping Gear',
                 date: '01/09/2023',
-              ),
-              _notificationItem(
-                text: 'Morgan added "Skis" for rent. Price: 300﷼.',
-                date: '31/08/2023',
-              ),
-              _notificationItem(
-                text: 'You added "Table" for community lending.',
-                date: '31/08/2023',
+                duration: 'من 5 سبتمبر إلى 7 سبتمبر',
               ),
             ],
           ),
         ),
       ),
-      bottomNavigationBar: BottomAppBar(
-        color: Colors.white,
-        elevation: 8,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              _bottomNavItem(
-                icon: Icons.home,
-                label: 'Home',
-                onTap: () {},
-                isActive: false,
-              ),
-              _bottomNavItem(
-                icon: Icons.notifications,
-                label: 'Notifications',
-                onTap: () {},
-                isActive: true,
-              ),
-              _bottomNavItem(
-                icon: Icons.chat,
-                label: 'Chat',
-                onTap: () {},
-                isActive: false,
-              ),
-            ],
+      bottomNavigationBar: BottomNavigationBar(
+        backgroundColor: Colors.white,
+        selectedItemColor: Colors.black,
+        unselectedItemColor: Colors.grey,
+        currentIndex: 1,
+        onTap: (index) {
+          if (index == 0) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (_) => const HomeScreen()),
+            );
+          } else if (index == 2) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (_) => const ChatPage()),
+            );
+          }
+        },
+        items: const [
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'الرئيسية'),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.notifications),
+            label: 'الإشعارات',
           ),
-        ),
+          BottomNavigationBarItem(icon: Icon(Icons.chat), label: 'الدردشة'),
+        ],
       ),
     );
   }
+}
 
-  Widget _notificationItem({
-    required String text,
-    required String date,
-  }) {
+class NotificationRequest extends StatelessWidget {
+  final String name;
+  final String item;
+  final String date;
+  final String duration;
+
+  const NotificationRequest({
+    super.key,
+    required this.name,
+    required this.item,
+    required this.date,
+    required this.duration,
+  });
+
+  @override
+  Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(text, style: const TextStyle(fontSize: 15)),
-          const SizedBox(height: 4),
           Text(
-            date,
-            style: TextStyle(color: Colors.grey[600], fontSize: 13),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _bottomNavItem({
-    required IconData icon,
-    required String label,
-    required VoidCallback onTap,
-    required bool isActive,
-  }) {
-    final iconColor = isActive ? Colors.white : Colors.grey[700];
-    final bgColor = isActive ? Colors.black : Colors.transparent;
-
-    return InkWell(
-      onTap: onTap,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            decoration: BoxDecoration(
-              color: bgColor,
-              shape: BoxShape.circle,
-            ),
-            padding: const EdgeInsets.all(8),
-            child: Icon(icon, color: iconColor, size: 20),
+            '$name طلب استعارة "$item".',
+            style: const TextStyle(fontSize: 15),
           ),
           const SizedBox(height: 4),
           Text(
-            label,
-            style: TextStyle(fontSize: 12, color: iconColor),
+            'المدة: $duration',
+            style: const TextStyle(fontSize: 13, color: Colors.black87),
           ),
+          const SizedBox(height: 4),
+          Text(date, style: TextStyle(color: Colors.grey[600], fontSize: 13)),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              ElevatedButton(
+                onPressed: () {
+                  // قبول الطلب
+                },
+                style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
+                child: const Text('قبول'),
+              ),
+              const SizedBox(width: 10),
+              ElevatedButton(
+                onPressed: () {
+                  // رفض الطلب
+                },
+                style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+                child: const Text('رفض'),
+              ),
+            ],
+          ),
+          const Divider(height: 24),
         ],
       ),
     );
