@@ -12,7 +12,10 @@ class WelcomeScreen extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const SizedBox(height: 100),
+            // صورة اللوقو
+            Image.asset('assets/logo.png', width: 300, height: 300),
+            const SizedBox(height: 5),
+
             const Text(
               'Dawwerha',
               style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
@@ -23,6 +26,7 @@ class WelcomeScreen extends StatelessWidget {
               style: TextStyle(fontSize: 16, color: Colors.black54),
             ),
             const SizedBox(height: 40),
+
             ElevatedButton(
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.black,

@@ -52,7 +52,9 @@ class _HomeScreenState extends State<HomeScreen> {
               // Handle menu actions
             },
             itemBuilder: (BuildContext context) {
-              return ['حسابي', 'طلباتي', 'مساهماتي'].map((String choice) {
+              return ['My Account', 'My Requests', 'My Contributions'].map((
+                String choice,
+              ) {
                 return PopupMenuItem<String>(
                   value: choice,
                   child: Text(choice),
@@ -145,12 +147,12 @@ class _HomeScreenState extends State<HomeScreen> {
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,
         items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'الرئيسية'),
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
           BottomNavigationBarItem(
             icon: Icon(Icons.notifications),
-            label: 'الإشعارات',
+            label: 'Notifacations',
           ),
-          BottomNavigationBarItem(icon: Icon(Icons.chat), label: 'الدردشة'),
+          BottomNavigationBarItem(icon: Icon(Icons.chat), label: 'Chat'),
         ],
       ),
     );
