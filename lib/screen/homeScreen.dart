@@ -1,8 +1,11 @@
+import 'package:dawwerha/screen/MyAccountScreen.dart';
 import 'package:dawwerha/screen/NotificationScreen.dart';
 import 'package:dawwerha/screen/itemDetailsScreen.dart';
+import 'package:dawwerha/screen/myCintributionsScreen.dart';
+import 'package:dawwerha/screen/myRequestsScreen.dart';
 import 'package:dawwerha/screen/uploadItemScreen.dart';
 import 'package:dawwerha/screen/chatScreen.dart';
-import 'package:dawwerha/screen/MyAccountScreen.dart';
+
 import 'package:flutter/material.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -50,7 +53,22 @@ class _HomeScreenState extends State<HomeScreen> {
           PopupMenuButton<String>(
             icon: const Icon(Icons.person, color: Colors.black),
             onSelected: (value) {
-              // Handle menu actions
+              if (value == 'My Account') {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => AccountInfoPage()),
+                );
+              } else if (value == 'My Requests') {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => MyRequestsPage()),
+                );
+              } else if (value == 'My Contributions') {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => MyContributionsPage()),
+                );
+              }
             },
             itemBuilder: (BuildContext context) {
               return ['My Account', 'My Requests', 'My Contributions'].map((
@@ -119,13 +137,11 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
       ),
-
-      // زر + لإضافة منتج
       floatingActionButton: Stack(
         children: [
           Positioned(
-            bottom: 70, // ارفعيه فوق البار
-            right: 16, // جهة اليمين
+            bottom: 70,
+            right: 16,
             child: FloatingActionButton(
               onPressed: () {
                 Navigator.push(
@@ -140,7 +156,6 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
-
       bottomNavigationBar: BottomNavigationBar(
         backgroundColor: Colors.white,
         selectedItemColor: Colors.black,
