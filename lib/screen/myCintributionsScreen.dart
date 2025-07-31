@@ -25,11 +25,11 @@ class MyContributionsPage extends StatelessWidget {
     ];
 
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: Colors.white, // <-- خلفية بيضاء
       appBar: AppBar(
         title: const Text('My Contributions'),
-        backgroundColor: Colors.black,
-        foregroundColor: Colors.white,
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black,
         elevation: 0,
       ),
       body: ListView.builder(
@@ -37,18 +37,18 @@ class MyContributionsPage extends StatelessWidget {
         itemBuilder: (context, index) {
           final item = contributions[index];
           return Card(
-            color: Colors.white10,
+            color: const Color(0xFFF2F2F2), // لون فاتح للبطاقات
             margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: ListTile(
               title: Text(
                 item['title'] ?? '',
-                style: const TextStyle(color: Colors.white),
+                style: const TextStyle(color: Colors.black),
               ),
               subtitle: Text(
                 'Status: ${item['status']} \nDate: ${item['date']}',
-                style: const TextStyle(color: Colors.white70),
+                style: const TextStyle(color: Colors.black87),
               ),
-              trailing: const Icon(Icons.edit, color: Colors.white),
+              trailing: const Icon(Icons.edit, color: Colors.black54),
               onTap: () {
                 // Open contribution details or edit page
               },

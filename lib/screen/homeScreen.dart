@@ -56,7 +56,7 @@ class _HomeScreenState extends State<HomeScreen> {
               if (value == 'My Account') {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (_) => AccountInfoPage()),
+                  MaterialPageRoute(builder: (_) => MyAccountPage()),
                 );
               } else if (value == 'My Requests') {
                 Navigator.push(

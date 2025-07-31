@@ -13,11 +13,11 @@ class MyRequestsPage extends StatelessWidget {
     ];
 
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: Colors.white, // <-- خلفية بيضاء
       appBar: AppBar(
         title: const Text('My Requests'),
-        backgroundColor: Colors.black,
-        foregroundColor: Colors.white,
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black,
         elevation: 0,
       ),
       body: ListView.builder(
@@ -25,18 +25,18 @@ class MyRequestsPage extends StatelessWidget {
         itemBuilder: (context, index) {
           final request = requests[index];
           return Card(
-            color: Colors.white10,
+            color: const Color(0xFFF2F2F2), // لون ناعم بدل الأبيض الشفاف
             margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: ListTile(
               title: Text(
                 'Order ID: ${request['id']}',
-                style: const TextStyle(color: Colors.white),
+                style: const TextStyle(color: Colors.black),
               ),
               subtitle: Text(
                 'Status: ${request['status']} \nDate: ${request['date']}',
-                style: const TextStyle(color: Colors.white70),
+                style: const TextStyle(color: Colors.black87),
               ),
-              trailing: const Icon(Icons.arrow_forward_ios, color: Colors.white),
+              trailing: const Icon(Icons.arrow_forward_ios, color: Colors.black54),
               onTap: () {
                 // Optional: navigate to request details page
               },
