@@ -1,84 +1,163 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 class ItemDetails extends StatelessWidget {
-  final String image;
-  final String title;
-  final String availability;
-  final String description;
+  final String itemId;
 
   const ItemDetails({
     super.key,
-    required this.image,
-    required this.title,
-    required this.availability,
-    required this.description,
+    required this.itemId,
+    required String image,
+    required String title,
+    required String availability,
+    required String description,
+    required String ownerID,
   });
 
   @override
   Widget build(BuildContext context) {
+    final currentUser = FirebaseAuth.instance.currentUser;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('تفاصيل المنتج'),
         backgroundColor: Colors.black,
+        foregroundColor: Colors.white,
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // صورة المنتج
-            ClipRRect(
-              borderRadius: BorderRadius.circular(12),
-              child: Image.network(
-                image,
-                height: 200,
-                width: double.infinity,
-                fit: BoxFit.cover,
-              ),
-            ),
-            const SizedBox(height: 16),
+      body: FutureBuilder<DocumentSnapshot>(
+        future:
+            FirebaseFirestore.instance.collection('items').doc(itemId).get(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
 
-            // اسم المنتج
-            Text(
-              title,
-              style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 12),
+          if (!snapshot.hasData || !snapshot.data!.exists) {
+            return const Center(child: Text('المنتج غير موجود'));
+          }
 
-            // فترة التوفر
-            Row(
+          final data = snapshot.data!;
+          final image = data['pictureURL'] ?? '';
+          final title = data['name'] ?? '';
+          final availability = data['availabilityDate'] ?? '';
+          final description = data['description'] ?? '';
+          final ownerID = data['ownerID'] ?? '';
+
+          String formattedDate = '';
+          if (availability is Timestamp) {
+            formattedDate = DateFormat(
+              'yyyy-MM-dd',
+            ).format(availability.toDate());
+          } else if (availability is String) {
+            formattedDate = availability.split('T').first;
+          }
+
+          return SingleChildScrollView(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Icon(Icons.calendar_today, size: 18, color: Colors.grey),
-                const SizedBox(width: 8),
-                Text(
-                  availability,
-                  style: const TextStyle(color: Colors.grey, fontSize: 14),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child:
+                      image.isNotEmpty
+                          ? Image.network(
+                            image,
+                            height: 230,
+                            width: double.infinity,
+                            fit: BoxFit.cover,
+                          )
+                          : Container(
+                            height: 230,
+                            width: double.infinity,
+                            color: Colors.grey[300],
+                            child: const Icon(
+                              Icons.image_not_supported,
+                              size: 80,
+                            ),
+                          ),
                 ),
+                const SizedBox(height: 20),
+
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 10),
+
+                Row(
+                  children: [
+                    const Icon(
+                      Icons.calendar_today,
+                      color: Colors.grey,
+                      size: 20,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      'متاح من: $formattedDate',
+                      style: const TextStyle(fontSize: 14, color: Colors.grey),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 20),
+
+                const Text(
+                  "الوصف:",
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                ),
+                const SizedBox(height: 6),
+                Text(description, style: const TextStyle(fontSize: 15)),
+                const SizedBox(height: 40),
+
+                if (currentUser != null && currentUser.uid != ownerID)
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton.icon(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.black,
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                      onPressed: () async {
+                        await FirebaseFirestore.instance
+                            .collection('notifications')
+                            .add({
+                              'senderID': currentUser.uid,
+                              'receiverID': ownerID,
+                              'itemID': itemId,
+                              'itemName': title,
+                              'timestamp': FieldValue.serverTimestamp(),
+                            });
+
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text("تم إرسال الطلب")),
+                        );
+                      },
+                      icon: const Icon(Icons.send, color: Colors.white),
+                      label: const Text(
+                        "اطلب الآن",
+                        style: TextStyle(color: Colors.white, fontSize: 16),
+                      ),
+                    ),
+                  )
+                else
+                  const Center(
+                    child: Text(
+                      'لا يمكنك طلب منتجك الخاص',
+                      style: TextStyle(color: Colors.grey),
+                    ),
+                  ),
               ],
             ),
-            const SizedBox(height: 20),
-
-            // وصف المنتج
-            Text(description, style: const TextStyle(fontSize: 16)),
-            const SizedBox(height: 40),
-
-            // زر "اطلب الآن"
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.black,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                ),
-                onPressed: () {},
-                child: const Text(
-                  "اطلب الآن",
-                  style: TextStyle(fontSize: 16, color: Colors.white),
-                ),
-              ),
-            ),
-          ],
-        ),
+          );
+        },
       ),
     );
   }

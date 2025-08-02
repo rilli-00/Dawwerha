@@ -5,8 +5,8 @@ import 'package:dawwerha/screen/myCintributionsScreen.dart';
 import 'package:dawwerha/screen/myRequestsScreen.dart';
 import 'package:dawwerha/screen/uploadItemScreen.dart';
 import 'package:dawwerha/screen/chatScreen.dart';
-
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -19,9 +19,7 @@ class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
 
   void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
+    setState(() => _selectedIndex = index);
 
     if (index == 1) {
       Navigator.push(
@@ -102,36 +100,43 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             const SizedBox(height: 12),
             Expanded(
-              child: GridView.count(
-                crossAxisCount: 2,
-                crossAxisSpacing: 10,
-                mainAxisSpacing: 10,
-                childAspectRatio: 0.8,
-                children: const [
-                  _ItemCard(
-                    image:
-                        "https://cdn.pixabay.com/photo/2014/08/23/19/39/camera-425204_1280.jpg",
-                    title: "Canon DSLR Camera",
-                    availability: "متوفر من 1 أغسطس إلى 5 أغسطس",
-                    description:
-                        "كاميرا احترافية مناسبة لهواة التصوير، تشمل العدسات والحقيبة.",
-                  ),
-                  _ItemCard(
-                    image:
-                        "https://cdn.pixabay.com/photo/2016/05/18/23/30/books-1404387_1280.jpg",
-                    title: "Stack of Novels",
-                    availability: "متوفر من 10 أغسطس إلى 12 أغسطس",
-                    description: "مجموعة روايات مشوقة للقراءة أثناء العطلة.",
-                  ),
-                  _ItemCard(
-                    image:
-                        "https://cdn.pixabay.com/photo/2017/01/20/00/30/knife-1999654_1280.jpg",
-                    title: "Kitchen Knife Set",
-                    availability: "متوفر من 3 أغسطس إلى 6 أغسطس",
-                    description:
-                        "مجموعة سكاكين مطبخ حادة وحديثة للطهي الاحترافي.",
-                  ),
-                ],
+              child: StreamBuilder<QuerySnapshot>(
+                stream:
+                    FirebaseFirestore.instance
+                        .collection('items')
+                        .orderBy('CreateAt', descending: true)
+                        .snapshots(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+
+                  if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                    return const Center(child: Text("No items found"));
+                  }
+
+                  final items = snapshot.data!.docs;
+
+                  return GridView.count(
+                    crossAxisCount: 2,
+                    crossAxisSpacing: 10,
+                    mainAxisSpacing: 10,
+                    childAspectRatio: 0.8,
+                    children:
+                        items.map((doc) {
+                          final data = doc.data() as Map<String, dynamic>;
+                          return _ItemCard(
+                            itemId: doc.id,
+                            image: data['pictureURL'] ?? '',
+                            title: data['name'] ?? '',
+                            availability:
+                                "Available from ${data['availabilityDate']?.toString().split('T').first ?? ''}",
+                            description: data['description'] ?? '',
+                            ownerID: data['ownerID'] ?? '',
+                          );
+                        }).toList(),
+                  );
+                },
               ),
             ),
           ],
@@ -166,7 +171,7 @@ class _HomeScreenState extends State<HomeScreen> {
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
           BottomNavigationBarItem(
             icon: Icon(Icons.notifications),
-            label: 'Notifacations',
+            label: 'Notifications',
           ),
           BottomNavigationBarItem(icon: Icon(Icons.chat), label: 'Chat'),
         ],
@@ -176,16 +181,20 @@ class _HomeScreenState extends State<HomeScreen> {
 }
 
 class _ItemCard extends StatelessWidget {
+  final String itemId;
   final String image;
   final String title;
   final String availability;
   final String description;
+  final String ownerID;
 
   const _ItemCard({
+    required this.itemId,
     required this.image,
     required this.title,
     required this.availability,
     required this.description,
+    required this.ownerID,
   });
 
   @override
@@ -197,10 +206,12 @@ class _ItemCard extends StatelessWidget {
           MaterialPageRoute(
             builder:
                 (_) => ItemDetails(
+                  itemId: itemId,
                   image: image,
                   title: title,
                   availability: availability,
                   description: description,
+                  ownerID: ownerID,
                 ),
           ),
         );

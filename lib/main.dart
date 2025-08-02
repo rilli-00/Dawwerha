@@ -24,7 +24,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
-      home: const WelcomeScreen(), // أو حطي LoginScreen مباشرة للتجربة
+      home: const WelcomeScreen(),
     );
   }
 }
