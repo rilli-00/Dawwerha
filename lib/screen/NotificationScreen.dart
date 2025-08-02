@@ -1,7 +1,7 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:dawwerha/screen/chatScreen.dart';
-import 'package:dawwerha/screen/homeScreen.dart';
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:dawwerha/screen/chatScreen.dart';
 
 class NotificationsPage extends StatefulWidget {
   const NotificationsPage({super.key});
@@ -11,26 +11,6 @@ class NotificationsPage extends StatefulWidget {
 }
 
 class _NotificationsPageState extends State<NotificationsPage> {
-  int _selectedIndex = 1; // المؤشر على Notifications
-
-  void _onItemTapped(int index) {
-    if (index == _selectedIndex) return;
-
-    setState(() => _selectedIndex = index);
-
-    if (index == 0) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => const HomeScreen()),
-      );
-    } else if (index == 2) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => const ChatPage()),
-      );
-    }
-  }
-
   Future<String> getSenderName(String senderID) async {
     try {
       final doc =
@@ -38,20 +18,16 @@ class _NotificationsPageState extends State<NotificationsPage> {
               .collection('user')
               .doc(senderID)
               .get();
-
-      final name = doc.data()?['name'];
-      if (name != null && name.toString().isNotEmpty) {
-        return name;
-      } else {
-        return 'Unknown user';
-      }
-    } catch (e) {
+      return doc.data()?['name'] ?? 'Unknown user';
+    } catch (_) {
       return 'Unknown user';
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final currentUserID = FirebaseAuth.instance.currentUser!.uid;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Notifications'),
@@ -60,32 +36,34 @@ class _NotificationsPageState extends State<NotificationsPage> {
       ),
       body: StreamBuilder<QuerySnapshot>(
         stream:
-            FirebaseFirestore.instance.collection('notifications').snapshots(),
+            FirebaseFirestore.instance
+                .collection('notifications')
+                .where('receiverID', isEqualTo: currentUserID)
+                .snapshots(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           }
-
           if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
             return const Center(child: Text('No notifications found.'));
           }
-
           final docs = snapshot.data!.docs;
 
           return ListView.builder(
             itemCount: docs.length,
             itemBuilder: (context, index) {
-              final data = docs[index].data() as Map<String, dynamic>;
-              final docId = docs[index].id;
+              final doc = docs[index];
+              final data = doc.data() as Map<String, dynamic>;
               final senderID = data['senderID'] ?? '';
               final itemName = data['itemName'] ?? 'Unknown item';
+              final docId = doc.id;
 
               return FutureBuilder<String>(
                 future: getSenderName(senderID),
-                builder: (context, snapshot) {
+                builder: (context, snapName) {
                   final senderName =
-                      snapshot.connectionState == ConnectionState.done
-                          ? snapshot.data ?? 'Unknown user'
+                      (snapName.connectionState == ConnectionState.done)
+                          ? (snapName.data ?? 'Unknown user')
                           : '...';
 
                   return Card(
@@ -110,14 +88,61 @@ class _NotificationsPageState extends State<NotificationsPage> {
                             mainAxisAlignment: MainAxisAlignment.end,
                             children: [
                               TextButton(
-                                onPressed: () {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                      content: Text('Request accepted'),
+                                onPressed: () async {
+                                  final chatRef = FirebaseFirestore.instance
+                                      .collection('chats');
+                                  final chatQuery =
+                                      await chatRef
+                                          .where(
+                                            'participants',
+                                            arrayContains: senderID,
+                                          )
+                                          .get();
+                                  String chatID;
+
+                                  if (chatQuery.docs.isNotEmpty) {
+                                    // استخدم الشات الموجود
+                                    chatID = chatQuery.docs.first.id;
+                                  } else {
+                                    // إنشاء شات جديد
+                                    chatID = chatRef.doc().id;
+                                    await chatRef.doc(chatID).set({
+                                      'chatID': chatID,
+                                      'participants': [currentUserID, senderID],
+                                      'lastMessage': 'Request accepted 🎉',
+                                      'timestamp': FieldValue.serverTimestamp(),
+                                    });
+                                    await chatRef
+                                        .doc(chatID)
+                                        .collection('messages')
+                                        .add({
+                                          'senderID': currentUserID,
+                                          'receiverID': senderID,
+                                          'message': 'Request accepted 🎉',
+                                          'timestamp':
+                                              FieldValue.serverTimestamp(),
+                                        });
+                                  }
+
+                                  // حذف الإشعار
+                                  await FirebaseFirestore.instance
+                                      .collection('notifications')
+                                      .doc(docId)
+                                      .delete();
+
+                                  // فتح صفحة الدردشة
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder:
+                                          (_) => ChatPage(
+                                            chatID: chatID,
+                                            otherUserID: senderID,
+                                          ),
                                     ),
                                   );
                                 },
-                                child: const Text('Accepet'), // كما أرسلتي
+                                child: const Text('Accepet'),
                               ),
                               TextButton(
                                 onPressed: () {
@@ -139,21 +164,6 @@ class _NotificationsPageState extends State<NotificationsPage> {
             },
           );
         },
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: Colors.white,
-        selectedItemColor: Colors.black,
-        unselectedItemColor: Colors.grey,
-        currentIndex: _selectedIndex,
-        onTap: _onItemTapped,
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.notifications),
-            label: 'Notifications',
-          ),
-          BottomNavigationBarItem(icon: Icon(Icons.chat), label: 'Chat'),
-        ],
       ),
     );
   }

@@ -29,7 +29,9 @@ class _HomeScreenState extends State<HomeScreen> {
     } else if (index == 2) {
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (_) => const ChatPage()),
+        MaterialPageRoute(
+          builder: (_) => const ChatPage(chatID: '', otherUserID: ''),
+        ),
       );
     }
   }
