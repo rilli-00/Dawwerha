@@ -1,29 +1,29 @@
+import 'dart:io' as io;
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:bloc/bloc.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:equatable/equatable.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/foundation.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path/path.dart' as path;
-import 'dart:io';
 
 class UploadItemCubit extends Cubit<UploadItemState> {
   UploadItemCubit() : super(UploadItemInitial());
 
-  /// Upload item to Firestore
-  void uploadItem({
+  Future<void> uploadItem({
     required String name,
     required String description,
     required DateTime availabilityDate,
-    String? pictureURL,
+    required String pictureURL,
   }) async {
     emit(UploadItemLoading());
 
     try {
       final uid = FirebaseAuth.instance.currentUser?.uid;
-
       if (uid == null) {
-        emit(const UploadItemError("User not logged in"));
+        emit(const UploadItemError("المستخدم غير مسجّل دخول"));
         return;
       }
 
@@ -31,7 +31,7 @@ class UploadItemCubit extends Cubit<UploadItemState> {
         'name': name,
         'description': description,
         'availabilityDate': availabilityDate.toIso8601String(),
-        'pictureURL': pictureURL, // يمكن أن تكون null
+        'pictureURL': pictureURL,
         'ownerID': uid,
         'availability': true,
         'CreateAt': FieldValue.serverTimestamp(),
@@ -39,33 +39,51 @@ class UploadItemCubit extends Cubit<UploadItemState> {
 
       emit(UploadItemSuccess());
     } catch (e) {
-      emit(UploadItemError("Failed to upload item: $e"));
+      emit(UploadItemError("فشل رفع العنصر: $e"));
     }
   }
 
-  /// Pick and upload image from gallery
   Future<String?> pickAndUploadImage() async {
+    final picker = ImagePicker();
+
     try {
-      final picker = ImagePicker();
       final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+      if (pickedFile == null) throw Exception("لم يتم اختيار صورة");
 
-      if (pickedFile == null) return null;
-
-      final fileName = path.basename(pickedFile.path);
+      final fileName = path.basename(pickedFile.name);
       final ref = FirebaseStorage.instance.ref().child('items/$fileName');
 
-      await ref.putFile(File(pickedFile.path));
-      final downloadURL = await ref.getDownloadURL();
+      UploadTask uploadTask;
 
+      if (kIsWeb) {
+        final fileBytes = await pickedFile.readAsBytes();
+
+        final extension = path.extension(pickedFile.name).toLowerCase();
+        final contentType = extension == '.png' ? 'image/png' : 'image/jpeg';
+
+        uploadTask = ref.putData(
+          fileBytes,
+          SettableMetadata(contentType: contentType),
+        );
+      } else {
+        // هذا السطر هو سبب الخطأ في الويب
+        final file = io.File(
+          pickedFile.path,
+        ); // 🧨 هذا لا يُستخدم إلا في Android/iOS
+        uploadTask = ref.putFile(file);
+      }
+
+      final snapshot = await uploadTask;
+      final downloadURL = await snapshot.ref.getDownloadURL();
+
+      print("✅ Uploaded image URL: $downloadURL");
       return downloadURL;
     } catch (e) {
-      emit(UploadItemError('Image upload failed: $e'));
-      return null;
+      print("Image upload failed: $e");
+      throw Exception("Image upload failed: $e");
     }
   }
 }
-
-// ---------------- STATES ----------------
 
 abstract class UploadItemState extends Equatable {
   const UploadItemState();

@@ -3,6 +3,7 @@ import 'package:dawwerha/screen/NotificationScreen.dart';
 import 'package:dawwerha/screen/itemDetailsScreen.dart';
 import 'package:dawwerha/screen/myCintributionsScreen.dart';
 import 'package:dawwerha/screen/myRequestsScreen.dart';
+import 'package:dawwerha/screen/myItemsScreen.dart'; // ✅ تم إضافته هنا
 import 'package:dawwerha/screen/uploadItemScreen.dart';
 import 'package:dawwerha/screen/chatScreen.dart';
 import 'package:flutter/material.dart';
@@ -68,12 +69,21 @@ class _HomeScreenState extends State<HomeScreen> {
                   context,
                   MaterialPageRoute(builder: (_) => MyContributionsPage()),
                 );
+              } else if (value == 'My Items') {
+                // ✅ تمت إضافته
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const MyItemsPage()),
+                );
               }
             },
             itemBuilder: (BuildContext context) {
-              return ['My Account', 'My Requests', 'My Contributions'].map((
-                String choice,
-              ) {
+              return [
+                'My Account',
+                'My Requests',
+                'My Contributions',
+                'My Items', // ✅ تمت إضافته
+              ].map((String choice) {
                 return PopupMenuItem<String>(
                   value: choice,
                   child: Text(choice),

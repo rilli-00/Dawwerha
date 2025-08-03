@@ -126,6 +126,19 @@ class ItemDetails extends StatelessWidget {
                         ),
                       ),
                       onPressed: () async {
+                        // أضف الطلب في كولكشن requests
+                        final requestDoc = await FirebaseFirestore.instance
+                            .collection('requests')
+                            .add({
+                              'senderID': currentUser.uid,
+                              'receiverID': ownerID,
+                              'itemID': itemId,
+                              'itemName': title,
+                              'status': 'active',
+                              'timestamp': FieldValue.serverTimestamp(),
+                            });
+
+                        // ثم أضف الإشعار مع requestID
                         await FirebaseFirestore.instance
                             .collection('notifications')
                             .add({
@@ -133,6 +146,8 @@ class ItemDetails extends StatelessWidget {
                               'receiverID': ownerID,
                               'itemID': itemId,
                               'itemName': title,
+                              'requestID':
+                                  requestDoc.id, // ✅ ربط الإشعار بالطلب
                               'timestamp': FieldValue.serverTimestamp(),
                             });
 

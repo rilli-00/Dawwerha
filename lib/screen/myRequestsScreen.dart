@@ -21,7 +21,7 @@ class MyRequestsPage extends StatelessWidget {
       body: StreamBuilder<QuerySnapshot>(
         stream:
             FirebaseFirestore.instance
-                .collection('notifications')
+                .collection('requests')
                 .where('senderID', isEqualTo: currentUser!.uid)
                 .snapshots(),
         builder: (context, snapshot) {
@@ -50,22 +50,82 @@ class MyRequestsPage extends StatelessWidget {
               return Card(
                 color: const Color(0xFFF2F2F2),
                 margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                child: ListTile(
-                  title: Text(
-                    'Product: $itemName',
-                    style: const TextStyle(color: Colors.black),
+                child: Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // معلومات الطلب
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Product: $itemName',
+                                  style: const TextStyle(
+                                    color: Colors.black,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  'Status: $status',
+                                  style: const TextStyle(color: Colors.black87),
+                                ),
+                                Text(
+                                  'Date: $formattedDate',
+                                  style: const TextStyle(color: Colors.black87),
+                                ),
+                              ],
+                            ),
+                          ),
+
+                          // الزر جنب المعلومات (إذا الحالة accepted)
+                          if (status == 'accepted')
+                            ElevatedButton(
+                              onPressed: () async {
+                                final requestId = requests[index].id;
+                                await FirebaseFirestore.instance
+                                    .collection('requests')
+                                    .doc(requestId)
+                                    .update({'status': 'in_use'});
+
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text('Status updated to: in_use'),
+                                  ),
+                                );
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color.fromARGB(
+                                  255,
+                                  129,
+                                  5,
+                                  186,
+                                ),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: 10,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                              ),
+                              child: const Text(
+                                'I received the item',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
+                    ],
                   ),
-                  subtitle: Text(
-                    'Status: $status\nDate: $formattedDate',
-                    style: const TextStyle(color: Colors.black87),
-                  ),
-                  trailing: const Icon(
-                    Icons.arrow_forward_ios,
-                    color: Colors.black54,
-                  ),
-                  onTap: () {
-                    // ممكن تضيف صفحة تفاصيل الطلب هنا لاحقًا
-                  },
                 ),
               );
             },

@@ -57,6 +57,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
               final senderID = data['senderID'] ?? '';
               final itemName = data['itemName'] ?? 'Unknown item';
               final docId = doc.id;
+              final requestID = data['requestID']; // ✅ جديد
 
               return FutureBuilder<String>(
                 future: getSenderName(senderID),
@@ -89,6 +90,13 @@ class _NotificationsPageState extends State<NotificationsPage> {
                             children: [
                               TextButton(
                                 onPressed: () async {
+                                  if (requestID != null) {
+                                    await FirebaseFirestore.instance
+                                        .collection('requests')
+                                        .doc(requestID)
+                                        .update({'status': 'accepted'});
+                                  }
+
                                   final chatRef = FirebaseFirestore.instance
                                       .collection('chats');
                                   final chatQuery =
@@ -101,10 +109,8 @@ class _NotificationsPageState extends State<NotificationsPage> {
                                   String chatID;
 
                                   if (chatQuery.docs.isNotEmpty) {
-                                    // استخدم الشات الموجود
                                     chatID = chatQuery.docs.first.id;
                                   } else {
-                                    // إنشاء شات جديد
                                     chatID = chatRef.doc().id;
                                     await chatRef.doc(chatID).set({
                                       'chatID': chatID,
@@ -124,13 +130,11 @@ class _NotificationsPageState extends State<NotificationsPage> {
                                         });
                                   }
 
-                                  // حذف الإشعار
                                   await FirebaseFirestore.instance
                                       .collection('notifications')
                                       .doc(docId)
                                       .delete();
 
-                                  // فتح صفحة الدردشة
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
@@ -145,8 +149,15 @@ class _NotificationsPageState extends State<NotificationsPage> {
                                 child: const Text('Accepet'),
                               ),
                               TextButton(
-                                onPressed: () {
-                                  FirebaseFirestore.instance
+                                onPressed: () async {
+                                  if (requestID != null) {
+                                    await FirebaseFirestore.instance
+                                        .collection('requests')
+                                        .doc(requestID)
+                                        .update({'status': 'rejected'});
+                                  }
+
+                                  await FirebaseFirestore.instance
                                       .collection('notifications')
                                       .doc(docId)
                                       .delete();

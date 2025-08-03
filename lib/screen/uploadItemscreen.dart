@@ -78,20 +78,39 @@ class _UploadItemScreenState extends State<UploadItemScreen> {
                         ),
                         const SizedBox(width: 10),
                         IconButton(
-                          onPressed: () async {
-                            final url =
-                                await context
-                                    .read<UploadItemCubit>()
-                                    .pickAndUploadImage();
-                            if (url != null) {
-                              setState(() {
-                                _uploadedImageURL = url;
-                              });
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text("Image uploaded")),
-                              );
-                            }
-                          },
+                          onPressed:
+                              state is UploadItemLoading
+                                  ? null
+                                  : () async {
+                                    try {
+                                      final url =
+                                          await context
+                                              .read<UploadItemCubit>()
+                                              .pickAndUploadImage();
+                                      if (url != null) {
+                                        setState(() {
+                                          _uploadedImageURL = url;
+                                        });
+                                        ScaffoldMessenger.of(
+                                          context,
+                                        ).showSnackBar(
+                                          const SnackBar(
+                                            content: Text("Image uploaded"),
+                                          ),
+                                        );
+                                      }
+                                    } catch (e) {
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(
+                                        SnackBar(
+                                          content: Text(
+                                            e.toString().split(': ').last,
+                                          ),
+                                        ),
+                                      );
+                                    }
+                                  },
                           icon: const Icon(Icons.image_outlined),
                           iconSize: 30,
                           color: Colors.black,
@@ -99,6 +118,14 @@ class _UploadItemScreenState extends State<UploadItemScreen> {
                         ),
                       ],
                     ),
+                    if (_uploadedImageURL != null) ...[
+                      const SizedBox(height: 10),
+                      Image.network(
+                        _uploadedImageURL!,
+                        height: 150,
+                        fit: BoxFit.cover,
+                      ),
+                    ],
                     const SizedBox(height: 15),
                     TextField(
                       controller: _descController,
@@ -154,10 +181,13 @@ class _UploadItemScreenState extends State<UploadItemScreen> {
                                 : () {
                                   if (_availabilityDate == null ||
                                       _nameController.text.isEmpty ||
-                                      _descController.text.isEmpty) {
+                                      _descController.text.isEmpty ||
+                                      _uploadedImageURL == null) {
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       const SnackBar(
-                                        content: Text('Please fill all fields'),
+                                        content: Text(
+                                          'Please fill all fields and upload image',
+                                        ),
                                       ),
                                     );
                                     return;
@@ -167,7 +197,7 @@ class _UploadItemScreenState extends State<UploadItemScreen> {
                                     name: _nameController.text.trim(),
                                     description: _descController.text.trim(),
                                     availabilityDate: _availabilityDate!,
-                                    pictureURL: _uploadedImageURL ?? '',
+                                    pictureURL: _uploadedImageURL!,
                                   );
                                 },
                         child:
