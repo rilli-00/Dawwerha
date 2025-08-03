@@ -33,7 +33,7 @@ class ChatPage extends StatelessWidget {
           onPressed: () => Navigator.pop(context),
         ),
         title: const Text(
-          'الدردشة',
+          'Chats',
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
@@ -125,12 +125,12 @@ class ChatPage extends StatelessWidget {
           }
         },
         items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'الرئيسية'),
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
           BottomNavigationBarItem(
             icon: Icon(Icons.notifications),
-            label: 'الإشعارات',
+            label: 'Notifications',
           ),
-          BottomNavigationBarItem(icon: Icon(Icons.chat), label: 'الدردشة'),
+          BottomNavigationBarItem(icon: Icon(Icons.chat), label: 'Chat'),
         ],
       ),
     );

@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:dawwerha/screen/chatScreen.dart';
+import 'package:dawwerha/screen/homeScreen.dart';
+import 'package:dawwerha/screen/NotificationScreen.dart'; // لنفس الصفحة
+// ✨ تأكدي من أن جميع الصفحات موجودة بنفس المسارات
 
 class NotificationsPage extends StatefulWidget {
   const NotificationsPage({super.key});
@@ -11,6 +14,27 @@ class NotificationsPage extends StatefulWidget {
 }
 
 class _NotificationsPageState extends State<NotificationsPage> {
+  int _selectedIndex = 1;
+
+  void _onItemTapped(int index) {
+    if (index == _selectedIndex) return;
+    setState(() => _selectedIndex = index);
+
+    if (index == 0) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => const HomeScreen()),
+      );
+    } else if (index == 2) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (_) => const ChatPage(chatID: '', otherUserID: ''),
+        ),
+      );
+    }
+  }
+
   Future<String> getSenderName(String senderID) async {
     try {
       final doc =
@@ -57,7 +81,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
               final senderID = data['senderID'] ?? '';
               final itemName = data['itemName'] ?? 'Unknown item';
               final docId = doc.id;
-              final requestID = data['requestID']; // ✅ جديد
+              final requestID = data['requestID'];
 
               return FutureBuilder<String>(
                 future: getSenderName(senderID),
@@ -175,6 +199,21 @@ class _NotificationsPageState extends State<NotificationsPage> {
             },
           );
         },
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        backgroundColor: Colors.white,
+        selectedItemColor: Colors.black,
+        unselectedItemColor: Colors.grey,
+        currentIndex: _selectedIndex,
+        onTap: _onItemTapped,
+        items: const [
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.notifications),
+            label: 'Notifications',
+          ),
+          BottomNavigationBarItem(icon: Icon(Icons.chat), label: 'Chat'),
+        ],
       ),
     );
   }

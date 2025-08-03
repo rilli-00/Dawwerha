@@ -88,13 +88,6 @@ class _MyAccountPageState extends State<MyAccountPage> {
                       ),
                       const SizedBox(height: 24),
 
-                      _buildInfoRow('Requests:', state.requestCount.toString()),
-                      _buildInfoRow(
-                        'Contributions:',
-                        state.contributionsCount.toString(),
-                      ),
-                      const SizedBox(height: 32),
-
                       Center(
                         child: ElevatedButton(
                           onPressed: () {
