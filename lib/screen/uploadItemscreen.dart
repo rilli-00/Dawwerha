@@ -181,13 +181,10 @@ class _UploadItemScreenState extends State<UploadItemScreen> {
                                 : () {
                                   if (_availabilityDate == null ||
                                       _nameController.text.isEmpty ||
-                                      _descController.text.isEmpty ||
-                                      _uploadedImageURL == null) {
+                                      _descController.text.isEmpty) {
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       const SnackBar(
-                                        content: Text(
-                                          'Please fill all fields and upload image',
-                                        ),
+                                        content: Text('Please fill all fields'),
                                       ),
                                     );
                                     return;
@@ -197,7 +194,9 @@ class _UploadItemScreenState extends State<UploadItemScreen> {
                                     name: _nameController.text.trim(),
                                     description: _descController.text.trim(),
                                     availabilityDate: _availabilityDate!,
-                                    pictureURL: _uploadedImageURL!,
+                                    pictureURL:
+                                        _uploadedImageURL ??
+                                        '', // ✅ تمرير الصورة إن وجدت
                                   );
                                 },
                         child:

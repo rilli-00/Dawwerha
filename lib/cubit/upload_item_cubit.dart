@@ -16,7 +16,7 @@ class UploadItemCubit extends Cubit<UploadItemState> {
     required String name,
     required String description,
     required DateTime availabilityDate,
-    required String pictureURL,
+    String? pictureURL,
   }) async {
     emit(UploadItemLoading());
 
@@ -26,17 +26,15 @@ class UploadItemCubit extends Cubit<UploadItemState> {
         emit(const UploadItemError("المستخدم غير مسجّل دخول"));
         return;
       }
-
       await FirebaseFirestore.instance.collection('items').add({
         'name': name,
         'description': description,
         'availabilityDate': availabilityDate.toIso8601String(),
-        'pictureURL': pictureURL,
+        'pictureURL': pictureURL ?? '',
         'ownerID': uid,
         'availability': true,
         'CreateAt': FieldValue.serverTimestamp(),
       });
-
       emit(UploadItemSuccess());
     } catch (e) {
       emit(UploadItemError("فشل رفع العنصر: $e"));
@@ -66,10 +64,7 @@ class UploadItemCubit extends Cubit<UploadItemState> {
           SettableMetadata(contentType: contentType),
         );
       } else {
-        // هذا السطر هو سبب الخطأ في الويب
-        final file = io.File(
-          pickedFile.path,
-        ); // 🧨 هذا لا يُستخدم إلا في Android/iOS
+        final file = io.File(pickedFile.path);
         uploadTask = ref.putFile(file);
       }
 
@@ -85,6 +80,7 @@ class UploadItemCubit extends Cubit<UploadItemState> {
   }
 }
 
+// ---------- STATES ----------
 abstract class UploadItemState extends Equatable {
   const UploadItemState();
 

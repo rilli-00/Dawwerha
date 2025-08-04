@@ -120,7 +120,6 @@ class _NotificationsPageState extends State<NotificationsPage> {
                                         .doc(requestID)
                                         .update({'status': 'accepted'});
                                   }
-
                                   final chatRef = FirebaseFirestore.instance
                                       .collection('chats');
                                   final chatQuery =
@@ -131,7 +130,6 @@ class _NotificationsPageState extends State<NotificationsPage> {
                                           )
                                           .get();
                                   String chatID;
-
                                   if (chatQuery.docs.isNotEmpty) {
                                     chatID = chatQuery.docs.first.id;
                                   } else {

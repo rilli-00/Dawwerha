@@ -137,7 +137,6 @@ class ItemDetails extends StatelessWidget {
                               'status': 'active',
                               'timestamp': FieldValue.serverTimestamp(),
                             });
-
                         // ثم أضف الإشعار مع requestID
                         await FirebaseFirestore.instance
                             .collection('notifications')
@@ -150,7 +149,6 @@ class ItemDetails extends StatelessWidget {
                                   requestDoc.id, // ✅ ربط الإشعار بالطلب
                               'timestamp': FieldValue.serverTimestamp(),
                             });
-
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(content: Text("تم إرسال الطلب")),
                         );
